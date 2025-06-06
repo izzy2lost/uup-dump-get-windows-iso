@@ -16,19 +16,14 @@ jobs:
         sudo apt update
         sudo apt install -y cabextract wimtools genisoimage p7zip-full
 
-    - name: Clone UUP Dump Script
-      run: |
-        git clone https://github.com/uup-dump/uup-dump.git
-        cd uup-dump
-        chmod +x *.sh
+    - name: Make Scripts Executable
+      run: chmod +x *.sh
 
     - name: Download Windows 11 Files (Home and Pro Editions)
-      working-directory: ./uup-dump
       run: |
         ./get-uup-files.sh --edition Home Pro --lang en-us --arch amd64 --winver 11
 
     - name: Create ISO with TPM/Secure Boot/RAM Bypass
-      working-directory: ./uup-dump
       run: |
         ./convert.sh --bypass-tpm-check --bypass-ram-check --bypass-secureboot-check --iso "Windows11_BYPASS_MULTI.iso"
 
@@ -36,4 +31,4 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: Windows11_BYPASS_MULTI
-        path: ./uup-dump/Windows11_BYPASS_MULTI.iso
+        path: ./Windows11_BYPASS_MULTI.iso
