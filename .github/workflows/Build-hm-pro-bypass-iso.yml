@@ -36,19 +36,22 @@ jobs:
       - name: Clone bypass tool
         run: git clone https://github.com/JosephM101/Force-Windows-11-Install.git
 
+      - name: Download Windows 11 ISO from Google Drive
+        run: |
+          curl -L -o Win11_24H2_English_x64.iso "https://drive.google.com/uc?export=download&id=1EGTi6h_NsDogEH7OJp6J3vxBf411CADO"
+
       - name: Apply TPM/SecureBoot/CPU bypass
         shell: pwsh
         run: |
-          # Move into the bypass repo
           cd Force-Windows-11-Install
 
-          # Patch the ISO; leave -Destination as a simple filename
+          # Overwrite the original ISO with the bypassed version
           .\Win11-TPM-RegBypass.ps1 `
-            -Source "${{ needs.download-consumer-iso.outputs.iso-path }}" `
-            -Destination "windows-11-home-pro-bypass.iso"
+          -Source "$Env:GITHUB_WORKSPACE\Win11_24H2_English_x64.iso" `
+          -Destination "$Env:GITHUB_WORKSPACE\Win11_24H2_English_x64.iso"
 
-      - name: Upload bypassed ISO
+      - name: Upload patched ISO
         uses: actions/upload-artifact@v4
         with:
-          name: win11-home-pro-bypass-iso
-          path: Force-Windows-11-Install/windows-11-home-pro-bypass.iso
+         name: win11-24h2-bypass-iso
+         path: Win11_24H2_English_x64.iso
