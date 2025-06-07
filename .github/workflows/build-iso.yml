@@ -21,12 +21,7 @@ jobs:
         shell: powershell
         run: |
           cd uup-dump-get-windows-iso
-          # Use specific edition IDs for Home and Pro
-          .\uup-dump-get-windows-iso.ps1 `
-            -ProductEdition "home,professional" `
-            -Edition "home,professional" `
-            -Language "en-us" `
-            -SkipIsoCheck
+          .\uup-dump-get-windows-iso.ps1 d3e090ef-98f1-43a7-8d5e-76f449c1ee02
 
       - name: Clone bypass tool
         run: git clone https://github.com/JosephM101/Force-Windows-11-Install.git
