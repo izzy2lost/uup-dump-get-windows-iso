@@ -39,13 +39,16 @@ jobs:
       - name: Apply TPM/SecureBoot/CPU bypass
         shell: pwsh
         run: |
+          # Move into the bypass repo
           cd Force-Windows-11-Install
+
+          # Patch the ISO; leave -Destination as a simple filename
           .\Win11-TPM-RegBypass.ps1 `
             -Source "${{ needs.download-consumer-iso.outputs.iso-path }}" `
-            -Destination "../windows-11-home-pro-bypass.iso"
+            -Destination "windows-11-home-pro-bypass.iso"
 
       - name: Upload bypassed ISO
         uses: actions/upload-artifact@v4
         with:
           name: win11-home-pro-bypass-iso
-          path: windows-11-home-pro-bypass.iso
+          path: Force-Windows-11-Install/windows-11-home-pro-bypass.iso
