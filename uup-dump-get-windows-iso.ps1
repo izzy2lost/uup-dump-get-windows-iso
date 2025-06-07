@@ -17,10 +17,10 @@ trap {
 $TARGETS = @{
     # see https://en.wikipedia.org/wiki/Windows_11
     # see https://en.wikipedia.org/wiki/Windows_11_version_history
-    "windows-11" = @{
+    "windows-11-home-pro" = @{
         search = "windows 11 22631 amd64" # aka 23H2. Enterprise EOL: November 10, 2026.
         edition = "Professional"
-        virtualEdition = "Enterprise"
+        virtualEdition = "Home"
     }
     # see https://en.wikipedia.org/wiki/Windows_Server_2022
     "windows-2022" = @{
