@@ -3,7 +3,7 @@ name: Build Windows 11 Home+Pro Bypass ISO
 on:
   workflow_dispatch:
 
-jobs:
+jobs:  
   patch-and-upload:
     runs-on: windows-latest
     steps:
@@ -11,41 +11,23 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Clone bypass tool
-        run: |
-          git clone https://github.com/JosephM101/Force-Windows-11-Install.git
+        run: git clone https://github.com/JosephM101/Force-Windows-11-Install.git
 
-      - name: Download ISO from Google Drive
+      - name: Install gdown
         shell: pwsh
         run: |
-          $fileId   = "1EGTi6h_NsDogEH7OJp6J3vxBf411CADO"
-          $fileName = "Win11_24H2_English_x64.iso"
+          python -m pip install --upgrade pip
+          python -m pip install gdown
 
-          # Build the base Google Drive URL
-          $baseUrl = "https://docs.google.com/uc?export=download&id=$fileId"
-          $session = New-Object Microsoft.PowerShell.Commands.WebRequestSession
-
-          # First request to get the confirm token (for large files)
-          $initial = Invoke-WebRequest -Uri $baseUrl -WebSession $session -UseBasicParsing
-          if ($initial.Content -match 'confirm=([0-9A-Za-z_]+)') {
-            $confirm    = $matches[1]
-            $downloadUrl = "https://docs.google.com/uc?export=download&confirm=$confirm&id=$fileId"
-          }
-          else {
-            # No token needed (small file or already cached)
-            $downloadUrl = $baseUrl
-          }
-
-          # Download the ISO
-          Write-Host "Downloading ISO to $fileName"
-          Invoke-WebRequest -Uri $downloadUrl -OutFile $fileName -WebSession $session -UseBasicParsing
-          Write-Host "Download complete: $fileName"
+      - name: Download ISO from Google Drive using gdown
+        shell: pwsh
+        run: |
+          python -m gdown --id 1EGTi6h_NsDogEH7OJp6J3vxBf411CADO --output Win11_24H2_English_x64.iso
 
       - name: Apply TPM/SecureBoot/CPU bypass
         shell: pwsh
         run: |
           cd Force-Windows-11-Install
-
-          # Overwrite the original ISO with the bypassed version
           .\Win11-TPM-RegBypass.ps1 `
             -Source "$Env:GITHUB_WORKSPACE\Win11_24H2_English_x64.iso" `
             -Destination "$Env:GITHUB_WORKSPACE\Win11_24H2_English_x64.iso"
