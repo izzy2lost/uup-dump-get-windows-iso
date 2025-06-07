@@ -3,7 +3,7 @@ name: Build Windows 11 Home+Pro Bypass ISO
 on:
   workflow_dispatch:
 
-jobs:  
+jobs:
   patch-and-upload:
     runs-on: windows-latest
     steps:
@@ -11,28 +11,34 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Clone bypass tool
-        run: git clone https://github.com/JosephM101/Force-Windows-11-Install.git
+        run: |
+          git clone https://github.com/JosephM101/Force-Windows-11-Install.git
 
       - name: Download ISO from Google Drive
-        shell: bash
+        shell: pwsh
         run: |
-          FILE_ID="1EGTi6h_NsDogEH7OJp6J3vxBf411CADO"
-          FILE_NAME="Win11_24H2_English_x64.iso"
+          $fileId   = "1EGTi6h_NsDogEH7OJp6J3vxBf411CADO"
+          $fileName = "Win11_24H2_English_x64.iso"
 
-          echo "Requesting download token..."
-          CONFIRM=$(wget --quiet --save-cookies cookies.txt --keep-session-cookies \
-            --no-check-certificate "https://docs.google.com/uc?export=download&id=${FILE_ID}" \
-            -O- | sed -n 's/.*confirm=.*&amp;.*/\1/p')
+          # Build the base Google Drive URL
+          $baseUrl = "https://docs.google.com/uc?export=download&id=$fileId"
+          $session = New-Object Microsoft.PowerShell.Commands.WebRequestSession
 
-          echo "Downloading ISO..."
-          wget --load-cookies cookies.txt \
-            "https://docs.google.com/uc?export=download&confirm=${CONFIRM}&id=${FILE_ID}" \
-            -O "${FILE_NAME}"
+          # First request to get the confirm token (for large files)
+          $initial = Invoke-WebRequest -Uri $baseUrl -WebSession $session -UseBasicParsing
+          if ($initial.Content -match 'confirm=([0-9A-Za-z_]+)') {
+            $confirm    = $matches[1]
+            $downloadUrl = "https://docs.google.com/uc?export=download&confirm=$confirm&id=$fileId"
+          }
+          else {
+            # No token needed (small file or already cached)
+            $downloadUrl = $baseUrl
+          }
 
-          echo "Cleaning up..."
-          rm -f cookies.txt
-
-          echo "Download complete: ${FILE_NAME}"
+          # Download the ISO
+          Write-Host "Downloading ISO to $fileName"
+          Invoke-WebRequest -Uri $downloadUrl -OutFile $fileName -WebSession $session -UseBasicParsing
+          Write-Host "Download complete: $fileName"
 
       - name: Apply TPM/SecureBoot/CPU bypass
         shell: pwsh
