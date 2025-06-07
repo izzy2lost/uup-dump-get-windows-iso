@@ -15,24 +15,23 @@ jobs:
         shell: powershell
         run: Set-ExecutionPolicy Bypass -Scope Process -Force
 
-      - name: Clone UUP dump miniserver (official)
-        run: git clone https://github.com/uup-dump/miniserver
+      - name: Clone UUP Dump API
+        run: git clone https://github.com/uup-dump/api uup
 
-      - name: Download and prepare UUP files for Home + Pro
+      - name: Prepare Windows 11 Home + Pro UUP Download
         shell: powershell
         run: |
-          cd miniserver
-          .\download.php `
-            id=d3e090ef-98f1-43a7-8d5e-76f449c1ee02 `
-            pack=en-us `
-            edition=home,professional `
-            arch=x64 `
-            no-links=1
+          cd uup
+          # This ID is for Windows 11 24H2 (26100.712) en-us x64
+          Invoke-WebRequest `
+            -Uri "https://uupdump.net/fetchupd.php?id=d3e090ef-98f1-43a7-8d5e-76f449c1ee02&lang=en-us&edition=professional,home&arch=x64&autodl=1" `
+            -OutFile "uup.zip"
+          Expand-Archive -Path "uup.zip" -DestinationPath "." -Force
 
       - name: Build Windows 11 ISO
         shell: powershell
         run: |
-          cd miniserver
+          cd uup
           .\uup_download_windows.ps1
 
       - name: Clone TPM Bypass Tool
