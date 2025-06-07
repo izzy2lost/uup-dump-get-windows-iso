@@ -14,14 +14,9 @@ jobs:
         shell: powershell
         run: Set-ExecutionPolicy Bypass -Scope Process -Force
 
-      - name: Clone UUP Dump ISO builder
-        run: git clone https://github.com/rgl/uup-dump-get-windows-iso.git
-
       - name: Generate stock Windows 11 ISO
         shell: powershell
         run: |
-          cd uup-dump-get-windows-iso
-          # Pull latest UUP files and build windows-11.iso
           .\uup-dump-get-windows-iso.ps1 windows-11-home-pro
           
       - name: Clone bypass tool
