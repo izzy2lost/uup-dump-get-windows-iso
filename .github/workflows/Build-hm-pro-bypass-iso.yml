@@ -21,7 +21,7 @@ jobs:
           Invoke-WebRequest https://github.com/pbatard/Fido/archive/refs/heads/master.zip -OutFile fido.zip
           Expand-Archive fido.zip -DestinationPath .
           cd Fido-master
-          .\fido.ps1 -win 11 -Lang List
+          .\fido.ps1 -win 11 -Lang English
     
       - name: Clone Bypass Script
         run: git clone https://github.com/JosephM101/Force-Windows-11-Install.git
