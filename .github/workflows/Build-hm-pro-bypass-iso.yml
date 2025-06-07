@@ -13,9 +13,26 @@ jobs:
       - name: Clone bypass tool
         run: git clone https://github.com/JosephM101/Force-Windows-11-Install.git
 
-      - name: Download Windows 11 ISO from Google Drive
+      - name: Download ISO from Google Drive
+        shell: bash
         run: |
-          curl -L -o Win11_24H2_English_x64.iso "https://drive.google.com/uc?export=download&id=1EGTi6h_NsDogEH7OJp6J3vxBf411CADO"
+          FILE_ID="1EGTi6h_NsDogEH7OJp6J3vxBf411CADO"
+          FILE_NAME="Win11_24H2_English_x64.iso"
+
+          echo "Requesting download token..."
+          CONFIRM=$(wget --quiet --save-cookies cookies.txt --keep-session-cookies \
+            --no-check-certificate "https://docs.google.com/uc?export=download&id=${FILE_ID}" \
+            -O- | sed -n 's/.*confirm=.*&amp;.*/\1/p')
+
+          echo "Downloading ISO..."
+          wget --load-cookies cookies.txt \
+            "https://docs.google.com/uc?export=download&confirm=${CONFIRM}&id=${FILE_ID}" \
+            -O "${FILE_NAME}"
+
+          echo "Cleaning up..."
+          rm -f cookies.txt
+
+          echo "Download complete: ${FILE_NAME}"
 
       - name: Apply TPM/SecureBoot/CPU bypass
         shell: pwsh
@@ -24,11 +41,11 @@ jobs:
 
           # Overwrite the original ISO with the bypassed version
           .\Win11-TPM-RegBypass.ps1 `
-          -Source "$Env:GITHUB_WORKSPACE\Win11_24H2_English_x64.iso" `
-          -Destination "$Env:GITHUB_WORKSPACE\Win11_24H2_English_x64.iso"
+            -Source "$Env:GITHUB_WORKSPACE\Win11_24H2_English_x64.iso" `
+            -Destination "$Env:GITHUB_WORKSPACE\Win11_24H2_English_x64.iso"
 
       - name: Upload patched ISO
         uses: actions/upload-artifact@v4
         with:
-         name: win11-24h2-bypass-iso
-         path: Win11_24H2_English_x64.iso
+          name: win11-24h2-bypass-iso
+          path: Win11_24H2_English_x64.iso
