@@ -1,34 +1,43 @@
-name: Build Windows 11 ISO with Bypass
+name: Build Windows 11 Bypass ISO
 
 on:
   workflow_dispatch:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
-
+    runs-on: windows-latest
     steps:
-    - name: Checkout Repository
-      uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-    - name: Install Required Packages
-      run: |
-        sudo apt update
-        sudo apt install -y cabextract wimtools genisoimage p7zip-full
+      - name: Enable script execution
+        shell: powershell
+        run: Set-ExecutionPolicy Bypass -Scope Process -Force
 
-    - name: Make Scripts Executable
-      run: chmod +x *.sh
+      - name: Clone UUP Dump ISO builder
+        run: git clone https://github.com/rgl/uup-dump-get-windows-iso.git
 
-    - name: Download Windows 11 Files (Home and Pro Editions)
-      run: |
-        ./get-uup-files.sh --edition Home Pro --lang en-us --arch amd64 --winver 11
+      - name: Generate stock Windows 11 ISO
+        shell: powershell
+        run: |
+          cd uup-dump-get-windows-iso
+          # Pull latest UUP files and build windows-11.iso
+          .\uup-dump-get-windows-iso.ps1 windows-11
 
-    - name: Create ISO with TPM/Secure Boot/RAM Bypass
-      run: |
-        ./convert.sh --bypass-tpm-check --bypass-ram-check --bypass-secureboot-check --iso "Windows11_BYPASS_MULTI.iso"
+      - name: Clone bypass tool
+        run: git clone https://github.com/JosephM101/Force-Windows-11-Install.git
 
-    - name: Upload ISO Artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: Windows11_BYPASS_MULTI
-        path: ./Windows11_BYPASS_MULTI.iso
+      - name: Apply registry-bypass patch
+        shell: powershell
+        run: |
+          cd Force-Windows-11-Install
+          # Patch Source ISO into a bypassed ISO
+          .\Win11-TPM-RegBypass.ps1 `
+            -Source "../uup-dump-get-windows-iso/output/windows-11.iso" `
+            -Destination "windows-11-bypass.iso"
+
+      - name: Upload bypass ISO artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: win11-bypass-iso
+          path: Force-Windows-11-Install/windows-11-bypass.iso
