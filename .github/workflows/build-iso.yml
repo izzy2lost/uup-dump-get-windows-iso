@@ -15,14 +15,24 @@ jobs:
         shell: powershell
         run: Set-ExecutionPolicy Bypass -Scope Process -Force
 
-      - name: Download UUP Dump ZIP for Windows 11 Home + Pro (24H2)
-        run: |
-          curl -L -o uup.zip "https://uup.rg-adguard.net/dl.php?id=d3e090ef-98f1-43a7-8d5e-76f449c1ee02&pack=en-us&edition=professional,home&arch=x64"
-          tar -xf uup.zip || unzip uup.zip
+      - name: Clone UUP dump miniserver (official)
+        run: git clone https://github.com/uup-dump/miniserver
 
-      - name: Build Windows 11 ISO with Home + Pro
+      - name: Download and prepare UUP files for Home + Pro
         shell: powershell
         run: |
+          cd miniserver
+          .\download.php `
+            id=d3e090ef-98f1-43a7-8d5e-76f449c1ee02 `
+            pack=en-us `
+            edition=home,professional `
+            arch=x64 `
+            no-links=1
+
+      - name: Build Windows 11 ISO
+        shell: powershell
+        run: |
+          cd miniserver
           .\uup_download_windows.ps1
 
       - name: Clone TPM Bypass Tool
@@ -32,8 +42,9 @@ jobs:
         shell: powershell
         run: |
           cd Force-Windows-11-Install
+          $iso = Get-ChildItem "$Env:GITHUB_WORKSPACE" -Filter *.iso | Select-Object -First 1
           .\Win11-TPM-RegBypass.ps1 `
-            -Source "$Env:GITHUB_WORKSPACE\\*.iso" `
+            -Source $iso.FullName `
             -Destination "$Env:GITHUB_WORKSPACE\\windows-11-bypass.iso"
 
       - name: Upload Bypass ISO Artifact
