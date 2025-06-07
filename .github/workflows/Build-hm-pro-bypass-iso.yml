@@ -3,7 +3,7 @@ name: Build Windows 11 Home+Pro Bypass ISO
 on:
   workflow_dispatch:
 
-jobs:  
+jobs:
   patch-and-upload:
     runs-on: windows-latest
     steps:
@@ -19,21 +19,24 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install gdown
 
-      - name: Download ISO from Google Drive using gdown
+      - name: Download ISO from Google Drive
         shell: pwsh
         run: |
-          python -m gdown --id 1EGTi6h_NsDogEH7OJp6J3vxBf411CADO --output Win11_24H2_English_x64.iso
+          gdown --id 1EGTi6h_NsDogEH7OJp6J3vxBf411CADO `
+            --output Win11_24H2_English_x64.iso
 
-      - name: Apply TPM/SecureBoot/CPU bypass
+      - name: Apply TPM/SecureBoot/CPU bypass (Home & Pro only)
         shell: pwsh
         run: |
           cd Force-Windows-11-Install
-          .\Win11-TPM-RegBypass.ps1 `
+
+          # Pipe "1,3" to select only Home (1) and Pro (3) editions
+          "1,3" | .\Win11-TPM-RegBypass.ps1 `
             -Source "$Env:GITHUB_WORKSPACE\Win11_24H2_English_x64.iso" `
             -Destination "$Env:GITHUB_WORKSPACE\Win11_24H2_English_x64.iso"
 
       - name: Upload patched ISO
         uses: actions/upload-artifact@v4
         with:
-          name: win11-24h2-bypass-iso
+          name: win11-24h2-home-pro-bypass-iso
           path: Win11_24H2_English_x64.iso
