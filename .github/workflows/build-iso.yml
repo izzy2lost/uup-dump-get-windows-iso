@@ -17,12 +17,16 @@ jobs:
       - name: Clone UUP Dump ISO builder
         run: git clone https://github.com/rgl/uup-dump-get-windows-iso.git
 
-      - name: Generate stock Windows 11 ISO
+      - name: Generate Windows 11 ISO with Home and Pro editions
         shell: powershell
         run: |
           cd uup-dump-get-windows-iso
-          # Pull latest UUP files and build windows-11.iso
-          .\uup-dump-get-windows-iso.ps1 windows-11
+          # Use specific edition IDs for Home and Pro
+          .\uup-dump-get-windows-iso.ps1 `
+            -ProductEdition "home,professional" `
+            -Edition "home,professional" `
+            -Language "en-us" `
+            -SkipIsoCheck
 
       - name: Clone bypass tool
         run: git clone https://github.com/JosephM101/Force-Windows-11-Install.git
@@ -31,7 +35,6 @@ jobs:
         shell: powershell
         run: |
           cd Force-Windows-11-Install
-          # Patch Source ISO into a bypassed ISO
           .\Win11-TPM-RegBypass.ps1 `
             -Source "../uup-dump-get-windows-iso/output/windows-11.iso" `
             -Destination "windows-11-bypass.iso"
