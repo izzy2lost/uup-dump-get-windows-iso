@@ -26,11 +26,14 @@ jobs:
         shell: powershell
         run: |
           cd Force-Windows-11-Install
-          # Patch Source ISO into a bypassed ISO
+          $iso = Get-ChildItem ../uup-dump-get-windows-iso/output/ -Filter *.iso | Sort-Object LastWriteTime -Descending | Select-Object -First 1
+          if (-not $iso) {
+          throw "No ISO found in ../uup-dump-get-windows-iso/output/"
+          }
           .\Win11-TPM-RegBypass.ps1 `
-            -Source "../uup-dump-get-windows-iso/output/windows-11.iso" `
-            -Destination "windows-11-bypass.iso"
-            
+          -Source $iso.FullName `
+          -Destination "windows-11-bypass.iso"
+      
       - name: Upload bypass ISO artifact
         uses: actions/upload-artifact@v4
         with:
