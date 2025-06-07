@@ -21,7 +21,7 @@ jobs:
         run: |
           Set-Location Fido
           # Download the latest consumer Windows 11 x64 ISO (Home + Pro editions included)
-          .\Fido.ps1 -Win 11 -Rel Latest -Ed All -Arch x64
+          .\Fido.ps1 -Win 11 -Rel Latest All -Arch x64
           # Capture the full path to the downloaded ISO
           $iso = (Get-ChildItem -Filter '*.iso' | Select-Object -First 1).FullName
           Write-Output "iso-path=$iso" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8
