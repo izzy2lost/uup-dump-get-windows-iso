@@ -304,7 +304,7 @@ function Get-WindowsIso($name, $destinationDirectory) {
         -Path $destinationIsoChecksumPath `
         -Value $isoChecksum
 
-    $windowsImages = Get-IsoWindowsImages $sourceIsoPath
+    # $windowsImages = Get-IsoWindowsImages $sourceIsoPath
 
     # create the iso metadata file.
     Set-Content `
