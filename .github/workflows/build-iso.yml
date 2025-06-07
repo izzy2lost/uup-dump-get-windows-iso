@@ -18,7 +18,7 @@ jobs:
         shell: powershell
         run: |
           .\uup-dump-get-windows-iso.ps1 windows-11-home-pro
-          
+
       - name: Clone bypass tool
         run: git clone https://github.com/JosephM101/Force-Windows-11-Install.git
 
@@ -26,16 +26,12 @@ jobs:
         shell: powershell
         run: |
           cd Force-Windows-11-Install
-          $iso = Get-ChildItem ../uup-dump-get-windows-iso/output/ -Filter *.iso | Sort-Object LastWriteTime -Descending | Select-Object -First 1
-          if (-not $iso) {
-          throw "No ISO found in ../uup-dump-get-windows-iso/output/"
-          }
           .\Win11-TPM-RegBypass.ps1 `
-          -Source $iso.FullName `
-          -Destination "windows-11-bypass.iso"
-      
+            -Source "$Env:GITHUB_WORKSPACE\output\windows-11-home-pro.iso" `
+            -Destination "$Env:GITHUB_WORKSPACE\output\windows-11-home-pro.iso"
+
       - name: Upload bypass ISO artifact
         uses: actions/upload-artifact@v4
         with:
           name: win11-bypass-iso
-          path: Force-Windows-11-Install/windows-11-bypass.iso
+          path: output/windows-11-home-pro.iso
