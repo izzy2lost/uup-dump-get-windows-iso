@@ -6,6 +6,7 @@ on:
 jobs:
   build:
     runs-on: windows-latest
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -14,28 +15,29 @@ jobs:
         shell: powershell
         run: Set-ExecutionPolicy Bypass -Scope Process -Force
 
-      - name: Clone UUP Dump ISO builder
-        run: git clone https://github.com/rgl/uup-dump-get-windows-iso.git
+      - name: Download UUP Dump ZIP for Windows 11 Home + Pro (24H2)
+        run: |
+          curl -L -o uup.zip "https://uup.rg-adguard.net/dl.php?id=d3e090ef-98f1-43a7-8d5e-76f449c1ee02&pack=en-us&edition=professional,home&arch=x64"
+          tar -xf uup.zip || unzip uup.zip
 
-      - name: Generate Windows 11 ISO with Home and Pro editions
+      - name: Build Windows 11 ISO with Home + Pro
         shell: powershell
         run: |
-          cd uup-dump-get-windows-iso
-          .\uup-dump-get-windows-iso.ps1 d3e090ef-98f1-43a7-8d5e-76f449c1ee02
+          .\uup_download_windows.ps1
 
-      - name: Clone bypass tool
+      - name: Clone TPM Bypass Tool
         run: git clone https://github.com/JosephM101/Force-Windows-11-Install.git
 
-      - name: Apply registry-bypass patch
+      - name: Apply TPM/SecureBoot Bypass Patch
         shell: powershell
         run: |
           cd Force-Windows-11-Install
           .\Win11-TPM-RegBypass.ps1 `
-            -Source "../uup-dump-get-windows-iso/output/windows-11.iso" `
-            -Destination "windows-11-bypass.iso"
+            -Source "$Env:GITHUB_WORKSPACE\\*.iso" `
+            -Destination "$Env:GITHUB_WORKSPACE\\windows-11-bypass.iso"
 
-      - name: Upload bypass ISO artifact
+      - name: Upload Bypass ISO Artifact
         uses: actions/upload-artifact@v4
         with:
           name: win11-bypass-iso
-          path: Force-Windows-11-Install/windows-11-bypass.iso
+          path: windows-11-bypass.iso
