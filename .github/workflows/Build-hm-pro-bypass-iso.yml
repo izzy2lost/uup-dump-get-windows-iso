@@ -3,31 +3,8 @@ name: Build Windows 11 Home+Pro Bypass ISO
 on:
   workflow_dispatch:
 
-jobs:
-  download-consumer-iso:
-    runs-on: windows-latest
-    outputs:
-      iso-path: ${{ steps.get-iso.outputs.iso-path }}
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Clone Fido (official multi-edition ISO downloader)
-        run: git clone https://github.com/pbatard/Fido.git
-
-      - name: Download Windows 11 (Home+Pro) ISO
-        id: get-iso
-        shell: pwsh
-        run: |
-          Set-Location Fido
-          # Download the latest consumer Windows 11 x64 ISO (Home + Pro editions included)
-          .\Fido.ps1 -Win 11 -Rel Latest All -Arch x64
-          # Capture the full path to the downloaded ISO
-          $iso = (Get-ChildItem -Filter '*.iso' | Select-Object -First 1).FullName
-          Write-Output "iso-path=$iso" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8
-
+jobs:  
   patch-and-upload:
-    needs: download-consumer-iso
     runs-on: windows-latest
     steps:
       - name: Checkout
